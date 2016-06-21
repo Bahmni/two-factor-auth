@@ -22,8 +22,12 @@ jar {
     baseName = 'two-factor-auth'
     version = '0.0.1-SNAPSHOT'
     manifest {
-        attributes 'Main-Class': 'org.bahmni.batch.Application'
+        attributes 'Main-Class': 'org.bahmni.auth.twofactor.Application'
     }
+}
+
+springBoot {
+    mainClass = "org.bahmni.auth.twofactor.Application"
 }
 
 repositories {
@@ -33,5 +37,6 @@ repositories {
 dependencies {
     compile('org.springframework.boot:spring-boot-starter')
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("com.jayway.jsonpath:json-path:2.2.0")
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
