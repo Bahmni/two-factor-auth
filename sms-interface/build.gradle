@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
+    }
+}
+apply plugin: "maven-publish"
+apply plugin: "maven-publish-auth"
+
+group 'org.bahmni.auth'
+version = "0.0.1-SNAPSHOT"
+
+jar {
+    baseName = 'sms-interface'
+    version = '0.0.1-SNAPSHOT'
+}
+
+publishing {
+    publications {
+        myPublication(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name "bahmni-artifactory"
+            url "http://bahmnirepo.thoughtworks.com/artifactory/libs-${project.version.endsWith('-SNAPSHOT') ? 'snapshot' : 'release'}-local"
+        }
+    }
+}

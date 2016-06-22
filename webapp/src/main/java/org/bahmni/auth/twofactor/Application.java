@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
-@ComponentScan("org.bahmni.auth.twofactor")
+@ComponentScan({"org.bahmni.auth.smsplugin", "org.bahmni.auth.twofactor"})
 public class Application {
 
     public static void main(String[] args) {
