@@ -22,6 +22,7 @@ jar {
 
 springBoot {
     mainClass = "org.bahmni.auth.twofactor.Application"
+    layout = 'ZIP'
 }
 
 dependencies {
