@@ -15,6 +15,6 @@ public class SampleSMS {
 
     @RequestMapping("/")
     public void hello() {
-        smsGateWay.sendSMS("abcd", "89891289");
+        smsGateWay.sendSMS("91", "0123456789", "OTP CODE");
     }
 }
