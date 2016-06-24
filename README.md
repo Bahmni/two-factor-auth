@@ -8,4 +8,4 @@ Download the `jar` file of the plugin you want to install and place it in `/home
 The build tool used in the project is gradle. The project is divided into two sub-projects. One is `sms-interface` and the other is `webapp`. 
 
 * `sms-interface` project contains the contract for the third party SMS gateway plugin. To build the project use `./gradlew clean sms-interface:build` 
-* `webapp` project contains the spring boot web application. To run it use `./gradlew clean webapp:build`. To run the web application use `java -Dloader.path=PATH/TO/PLUGIN -jar two-factor-auth-VERSION.jar`. If you do not specify a valid plugin path the web app will fail to start.
+* `webapp` project contains the spring boot web application. To build it use `./gradlew clean webapp:build`. To run the web application use `java -Dloader.path=/home/bahmni/.bahmni-security/ -jar two-factor-auth-VERSION.jar`. If you do not specify a valid plugin path the web app will fail to start.
