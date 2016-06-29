@@ -1,0 +1,48 @@
+plugins {
+    id "nebula.ospackage" version "3.4.0"
+}
+
+group 'org.bahmni.twoFactorAuth'
+version project.bahmniRelease
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'java'
+
+ospackage {
+    packageName = 'bahmni-two-factor-auth'
+    release = System.getenv('GO_PIPELINE_COUNTER') ?: project.buildNumber
+    arch = NOARCH
+    os = LINUX
+    user = 'root'
+
+    into '/opt/bahmni-two-factor-auth'
+
+    from("${projectDir}/resources/bahmni-two-factor-auth.jar") {
+        fileMode = 0644
+        createDirectoryEntry = true
+        into 'lib/'
+    }
+
+    from("${projectDir}/resources/") {
+        fileMode = 0755
+        createDirectoryEntry = true
+        into 'etc'
+    }
+
+    from("${projectDir}/scripts/rpm/") {
+        fileMode = 0744
+        createDirectoryEntry = true
+        into 'bin'
+    }
+}
+
+buildRpm {
+    dependsOn 'build'
+
+    preInstall file("${projectDir}/scripts/preinstall.sh")
+    postInstall file("${projectDir}/scripts/postinstall.sh")
+    preUninstall file("${projectDir}/scripts/preuninstall.sh")
+}
