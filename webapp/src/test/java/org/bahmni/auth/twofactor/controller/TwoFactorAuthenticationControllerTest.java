@@ -45,9 +45,19 @@ public class TwoFactorAuthenticationControllerTest {
         when(otpService.generateAndSaveOtpFor("user")).thenReturn(new OTP("1234", 123121));
         when(database.findMobileNumberByUserName("user")).thenReturn(contact);
 
-        twoFactorAuthenticationController.sendOTP("user");
+        boolean messageSent = twoFactorAuthenticationController.sendOTP("user");
 
         verify(smsGateWay, times(1)).sendSMS("91", "909099172", "1234");
+        assertThat(messageSent, is(true));
+    }
+
+    @Test
+    public void shouldReturnFalseIfThereIsNoContactAvailableForTheUser() {
+        when(otpService.generateAndSaveOtpFor("user")).thenReturn(new OTP("1234", 123121));
+
+        boolean messageSent = twoFactorAuthenticationController.sendOTP("user");
+
+        assertThat(messageSent, is(false));
     }
 
     @Test

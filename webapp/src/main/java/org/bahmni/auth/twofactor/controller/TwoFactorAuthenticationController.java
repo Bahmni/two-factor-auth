@@ -25,12 +25,14 @@ public class TwoFactorAuthenticationController {
     private Database database;
 
     @RequestMapping(path = "/send", method = RequestMethod.GET)
-    public void sendOTP(@RequestParam(name = "userName") String userName) {
+    public boolean sendOTP(@RequestParam(name = "userName") String userName) {
         OTP otp = otpService.generateAndSaveOtpFor(userName);
         Contact contact = database.findMobileNumberByUserName(userName);
         if (contact != null) {
             smsGateWay.sendSMS(contact.getCountryCode(), contact.getMobileNumber(), otp.toString());
+            return true;
         }
+        return false;
     }
 
     @RequestMapping(path = "/validate", method = RequestMethod.GET)
