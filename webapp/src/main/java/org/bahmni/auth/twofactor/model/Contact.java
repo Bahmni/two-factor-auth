@@ -23,20 +23,20 @@ public class Contact {
         return countryCode;
     }
 
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     public void setCountryCode(String countryCode) {
         this.countryCode = countryCode;
     }
 
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
     public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
 

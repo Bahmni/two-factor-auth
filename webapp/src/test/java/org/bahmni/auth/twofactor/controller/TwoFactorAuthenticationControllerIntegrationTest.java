@@ -27,8 +27,8 @@ import static org.junit.Assert.assertThat;
 @DatabaseSetup("dataset.xml")
 public class TwoFactorAuthenticationControllerIntegrationTest {
 
-    private RestOperations restOperations = new RestTemplate();
     private final String SERVER_URL = "http://localhost:62480";
+    private RestOperations restOperations = new RestTemplate();
 
     @Test
     public void shouldSendOTPToTheGiveNumber() {
