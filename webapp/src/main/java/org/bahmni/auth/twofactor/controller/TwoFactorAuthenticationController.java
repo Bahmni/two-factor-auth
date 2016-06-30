@@ -1,5 +1,7 @@
 package org.bahmni.auth.twofactor.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bahmni.auth.smsinterface.SmsGateWay;
 import org.bahmni.auth.twofactor.database.Database;
 import org.bahmni.auth.twofactor.model.Contact;
@@ -24,12 +26,15 @@ public class TwoFactorAuthenticationController {
     @Autowired
     private Database database;
 
+    private static Logger logger = LogManager.getLogger(TwoFactorAuthenticationController.class);
+
     @RequestMapping(path = "/send", method = RequestMethod.GET)
     public boolean sendOTP(@RequestParam(name = "userName") String userName) {
         OTP otp = otpService.generateAndSaveOtpFor(userName);
         Contact contact = database.findMobileNumberByUserName(userName);
         if (contact != null) {
             smsGateWay.sendSMS(contact.getCountryCode(), contact.getMobileNumber(), otp.toString());
+            logger.info("SMS sent to " + userName + " carrying OTP " + otp);
             return true;
         }
         return false;
