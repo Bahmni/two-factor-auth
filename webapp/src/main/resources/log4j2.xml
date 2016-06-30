@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <appenders>
-        <RollingFile name="RollingFile" fileName="/var/log/two-factor-auth/audit-logs/two-factor-auth.log"
-                     filePattern="/var/log/two-factor-auth/audit-logs/two-factor-auth-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="RollingFile" fileName="/var/log/bahmni-two-factor-auth/audit-logs/bahmni-two-factor-auth.log"
+                     filePattern="/var/log/bahmni-two-factor-auth/audit-logs/bahmni-two-factor-auth-%d{yyyy-MM-dd}-%i.log">
             <Policies>
                 <TimeBasedTriggeringPolicy/>
             </Policies>

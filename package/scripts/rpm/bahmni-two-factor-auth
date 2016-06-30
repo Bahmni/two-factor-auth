@@ -39,7 +39,7 @@ start(){
         echo -e "\e[00;32mStarting bahmni-two-factor-auth\e[00m"
         if [ `user_exists $BAHMNI_TWO_FACTOR_AUTH_USER` = "1" ]  && [ "$CUR_USER" != "$BAHMNI_TWO_FACTOR_AUTH_USER" ] ;
         then
-                /bin/su $BAHMNI_TWO_FACTOR_AUTH_USER -c $BAHMNI_TWO_FACTOR_AUTH_RUN
+                su -s /bin/bash $BAHMNI_TWO_FACTOR_AUTH_USER $BAHMNI_TWO_FACTOR_AUTH_RUN
         else
                 sh $BAHMNI_TWO_FACTOR_AUTH_RUN
         fi

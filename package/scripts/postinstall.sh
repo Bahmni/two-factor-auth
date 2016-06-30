@@ -21,6 +21,7 @@ chkconfig --add bahmni-two-factor-auth
 mkdir -p /opt/bahmni-two-factor-auth/etc/openmrs/
 mkdir -p /opt/bahmni-two-factor-auth/run/
 mkdir -p /opt/bahmni-two-factor-auth/log/
+mkdir -p /opt/bahmni-two-factor-auth/log/audit-logs/
 mv -f /opt/openmrs/openmrs/WEB-INF/web.xml /opt/bahmni-two-factor-auth/etc/openmrs/
 cp -f /opt/bahmni-two-factor-auth/etc/externalauth.jar /opt/openmrs/openmrs/WEB-INF/lib/
 cp -f /opt/bahmni-two-factor-auth/etc/web.xml /opt/openmrs/openmrs/WEB-INF/
@@ -45,6 +46,14 @@ manage_permissions(){
     chown -R bahmni:bahmni /etc/bahmni-two-factor-auth
 }
 
+run_migrations() {
+    echo "Running two-factor-auth liquibase.xml"
+    /opt/bahmni-two-factor-auth/etc/run-liquibase.sh >> /opt/bahmni-two-factor-auth/log/bahmni-two-factor-auth.log 2>> /opt/bahmni-two-factor-auth/log/bahmni-two-factor-auth.log
+}
+
 link_directories
+if [ "${IS_PASSIVE:-0}" -ne "1" ]; then
+    run_migrations
+fi
 manage_permissions
 
