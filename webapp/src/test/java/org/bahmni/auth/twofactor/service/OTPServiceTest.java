@@ -7,6 +7,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.bahmni.auth.twofactor.model.OTP;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +20,10 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -124,6 +127,19 @@ public class OTPServiceTest {
         boolean isValid = otpService.validateOTPFor("user", otp.toString());
 
         assertThat(isValid, is(true));
+    }
+
+    @Test
+    public void generatedOtpShouldBeRandomForAUserToGuessIt() throws InterruptedException {
+        Set<String> generatedOtps = new HashSet<>();
+        for (int x = 0; x < 10; x++) {
+            OTP otp = otpService.generateAndSaveOtpFor("user");
+            if (generatedOtps.contains(otp.toString())) {
+                Assert.fail("Same OTP generated again after " + x + " OTPs!");
+            }
+            Thread.sleep(100L);
+            generatedOtps.add(otp.toString());
+        }
     }
 
     @Test
