@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OTPService {
@@ -18,11 +18,11 @@ public class OTPService {
     private static Logger logger = LogManager.getLogger(OTPService.class);
 
     private SecureRandom secureRandom = new SecureRandom();
-    private Map<String, OTP> hashMap = new HashMap<>();
+    private Map<String, OTP> generatedOtps = new ConcurrentHashMap<>();
 
     public OTP generateAndSaveOtpFor(String userName) {
         OTP otp = new OTP(generateOTP(), System.currentTimeMillis());
-        hashMap.put(userName, otp);
+        generatedOtps.put(userName, otp);
         logger.info("OTP " + otp + " generated for " + userName);
         return otp;
     }
@@ -38,7 +38,7 @@ public class OTPService {
     }
 
     public boolean validateOTPFor(String userName, String receivedOtp) {
-        OTP otp = hashMap.get(userName);
+        OTP otp = generatedOtps.get(userName);
 
         if (otp != null) {
             if (otp.toString().equals(receivedOtp)) {
@@ -46,7 +46,7 @@ public class OTPService {
                     logger.warn("Expired OTP " + receivedOtp + " sent by " + userName);
                     return false;
                 }
-                hashMap.remove(userName);
+                generatedOtps.remove(userName);
                 logger.info("OTP " + receivedOtp + " validation successful for " + userName);
                 return true;
             } else {
