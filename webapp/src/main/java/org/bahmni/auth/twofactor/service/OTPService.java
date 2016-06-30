@@ -12,13 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class OTPService {
+    private static Logger logger = LogManager.getLogger(OTPService.class);
+    
+    private Map<String, OTP> generatedOtps = new ConcurrentHashMap<>();
+    private SecureRandom secureRandom = new SecureRandom();
+
     @Autowired
     private OTPConfiguration otpConfiguration;
-
-    private static Logger logger = LogManager.getLogger(OTPService.class);
-
-    private SecureRandom secureRandom = new SecureRandom();
-    private Map<String, OTP> generatedOtps = new ConcurrentHashMap<>();
 
     public OTP generateAndSaveOtpFor(String userName) {
         OTP otp = new OTP(generateOTP(), System.currentTimeMillis());

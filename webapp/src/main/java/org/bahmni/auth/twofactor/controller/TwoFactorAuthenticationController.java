@@ -17,16 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 @RestController
 public class TwoFactorAuthenticationController {
+    private static Logger logger = LogManager.getLogger(TwoFactorAuthenticationController.class);
+
     @Autowired
     private OTPService otpService;
-
     @Autowired
     private SmsGateWay smsGateWay;
-
     @Autowired
     private Database database;
-
-    private static Logger logger = LogManager.getLogger(TwoFactorAuthenticationController.class);
 
     @RequestMapping(path = "/send", method = RequestMethod.GET)
     public boolean sendOTP(@RequestParam(name = "userName") String userName) {
