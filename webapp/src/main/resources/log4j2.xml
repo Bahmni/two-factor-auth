@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration status="info">
     <appenders>
         <RollingFile name="MyRollingFile"
                      fileName="/var/log/bahmni-two-factor-auth/audit-logs/bahmni-two-factor-auth.log"
                      filePattern="/var/log/bahmni-two-factor-auth/audit-logs/bahmni-two-factor-auth-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
             </Policies>
+            <DefaultRolloverStrategy max="90"/>
         </RollingFile>
     </appenders>
     <loggers>
-        <root>
-            <appender-ref ref="MyRollingFile" level="info"/>
+        <root level="info">
+            <appenderref ref="MyRollingFile"/>
         </root>
     </loggers>
 </configuration>
