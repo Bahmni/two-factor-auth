@@ -51,9 +51,18 @@ run_migrations() {
     /opt/bahmni-two-factor-auth/etc/run-liquibase.sh >> /opt/bahmni-two-factor-auth/log/bahmni-two-factor-auth.log 2>> /opt/bahmni-two-factor-auth/log/bahmni-two-factor-auth.log
 }
 
+link_properties_file(){
+    echo "Linking properties file"
+    mkdir -p /home/$USERID/.bahmni-security
+    ln -s /opt/bahmni-two-factor-auth/etc/*.properties /home/$USERID/.bahmni-security/
+}
+
 link_directories
 if [ "${IS_PASSIVE:-0}" -ne "1" ]; then
     run_migrations
 fi
 manage_permissions
+if [ -f "/opt/bahmni-two-factor-auth/etc/application.properties" ]; then
+    link_properties_file
+fi
 

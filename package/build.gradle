@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'org.bahmni.twoFactorAuth'
-version project.bahmniRelease
+version project.version
 
 repositories {
     mavenCentral()
