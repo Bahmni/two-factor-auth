@@ -6,6 +6,7 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.bahmni.auth.smsinterface.SmsGateWay;
+import org.bahmni.auth.twofactor.ResponseConstants;
 import org.bahmni.auth.twofactor.database.Database;
 import org.bahmni.auth.twofactor.model.Contact;
 import org.bahmni.auth.twofactor.model.OTP;
@@ -95,22 +96,22 @@ public class TwoFactorAuthenticationControllerTest {
 
     @Test
     public void shouldReturnTrueIfOtpServiceValidationSucceeds() {
-        when(otpService.validateOTPFor("user", "1234")).thenReturn(true);
+        when(otpService.validateOTPFor("user", "1234")).thenReturn(ResponseConstants.SUCCESS);
 
-        boolean isValid = twoFactorAuthenticationController.validateOTP("user", "1234");
+        String response = twoFactorAuthenticationController.validateOTP("user", "1234");
 
         verify(otpService, times(1)).validateOTPFor("user", "1234");
-        assertThat(isValid, is(true));
+        assertThat(response, is(ResponseConstants.SUCCESS));
     }
 
     @Test
     public void shouldReturnFalseIfOtpServiceValidationFails() {
-        when(otpService.validateOTPFor("user", "1234")).thenReturn(false);
+        when(otpService.validateOTPFor("user", "1234")).thenReturn(ResponseConstants.FAILED);
 
-        boolean isValid = twoFactorAuthenticationController.validateOTP("user", "1234");
+        String response = twoFactorAuthenticationController.validateOTP("user", "1234");
 
         verify(otpService, times(1)).validateOTPFor("user", "1234");
-        assertThat(isValid, is(false));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
     @Test

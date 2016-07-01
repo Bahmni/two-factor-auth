@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
+import org.bahmni.auth.twofactor.ResponseConstants;
 import org.bahmni.auth.twofactor.model.OTP;
 import org.junit.After;
 import org.junit.Assert;
@@ -67,6 +68,7 @@ public class OTPServiceTest {
         when(System.currentTimeMillis()).thenReturn(12L);
         when(otpConfiguration.getOTPLength()).thenReturn(4);
         when(otpConfiguration.getExpiryTimeIntervalInMillis()).thenReturn(100L);
+        when(otpConfiguration.getMaxOTPAttempts()).thenReturn(3);
     }
 
     @After
@@ -83,27 +85,27 @@ public class OTPServiceTest {
 
     @Test
     public void shouldReturnFalseIfThereIsNoOTPGeneratedForAUser() {
-        boolean isValid = otpService.validateOTPFor("user", "123");
+        String response = otpService.validateOTPFor("user", "123");
 
-        assertThat(isValid, is(false));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
     @Test
     public void shouldReturnFalseIfTheGivenOTPIsNotValidForAUser() {
         OTP otp = otpService.generateAndSaveOtpFor("user");
 
-        boolean isValid = otpService.validateOTPFor("user", otp.toString() + "121");
+        String response = otpService.validateOTPFor("user", otp.toString() + "121");
 
-        assertThat(isValid, is(false));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
     @Test
     public void shouldReturnTrueIfTheGivenOTPIsValidForAUser() {
         OTP otp = otpService.generateAndSaveOtpFor("user");
 
-        boolean isValid = otpService.validateOTPFor("user", otp.toString());
+        String response = otpService.validateOTPFor("user", otp.toString());
 
-        assertThat(isValid, is(true));
+        assertThat(response, is(ResponseConstants.SUCCESS));
     }
 
     @Test
@@ -112,9 +114,9 @@ public class OTPServiceTest {
 
         when(System.currentTimeMillis()).thenReturn(1290L);
 
-        boolean isValid = otpService.validateOTPFor("user", otp.toString());
+        String response = otpService.validateOTPFor("user", otp.toString());
 
-        assertThat(isValid, is(false));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
 
@@ -124,9 +126,9 @@ public class OTPServiceTest {
 
         when(System.currentTimeMillis()).thenReturn(90L);
 
-        boolean isValid = otpService.validateOTPFor("user", otp.toString());
+        String response = otpService.validateOTPFor("user", otp.toString());
 
-        assertThat(isValid, is(true));
+        assertThat(response, is(ResponseConstants.SUCCESS));
     }
 
     @Test
@@ -140,6 +142,37 @@ public class OTPServiceTest {
             Thread.sleep(100L);
             generatedOtps.add(otp.toString());
         }
+    }
+
+    @Test
+    public void shouldLockOutUserIfInvalidAttemptsAreMoreThanConfiguredLimit() {
+        OTP otp = otpService.generateAndSaveOtpFor("user");
+
+        String response = otpService.validateOTPFor("user", otp.toString() + "121");
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        response = otpService.validateOTPFor("user", otp.toString() + "121");
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        response = otpService.validateOTPFor("user", otp.toString() + "121");
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        response = otpService.validateOTPFor("user", otp.toString() + "121");
+        assertThat(response, is(ResponseConstants.LOCKED_OUT));
+    }
+
+    @Test
+    public void shouldLogFailedAndLockOutEventsOutUserForInvalidAttempts() {
+        OTP otp = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP = otp.toString() + "121";
+
+        otpService.validateOTPFor("user", wrongOTP);
+        otpService.validateOTPFor("user", wrongOTP);
+        otpService.validateOTPFor("user", wrongOTP);
+        otpService.validateOTPFor("user", wrongOTP);
+
+        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "user locked out for max otp attempts");
     }
 
     @Test
@@ -173,9 +206,10 @@ public class OTPServiceTest {
     public void shouldLogFailedValidationOfOTP() {
         OTP otp = otpService.generateAndSaveOtpFor("user");
 
-        otpService.validateOTPFor("user", otp.toString() + "123");
+        String wrongOTP = otp.toString() + "123";
+        otpService.validateOTPFor("user", wrongOTP);
 
-        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "OTP " + otp.toString() + "123" + " validation failed for user");
+        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user");
     }
 
     @Test

@@ -39,7 +39,7 @@ public class TwoFactorAuthenticationController {
     }
 
     @RequestMapping(path = "/validate", method = RequestMethod.GET)
-    public boolean validateOTP(@RequestParam(name = "userName") String userName, @RequestParam(name = "otp") String receivedOTP) {
+    public String validateOTP(@RequestParam(name = "userName") String userName, @RequestParam(name = "otp") String receivedOTP) {
         return otpService.validateOTPFor(userName, receivedOTP);
     }
 

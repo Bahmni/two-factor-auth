@@ -17,4 +17,8 @@ public class OTPConfiguration {
     public int getOTPLength() {
         return Integer.valueOf(environment.getProperty("OTP_LENGTH"));
     }
+
+    public int getMaxOTPAttempts() {
+        return Integer.valueOf(environment.getProperty("MAX_OTP_ATTEMPTS"));
+    }
 }
