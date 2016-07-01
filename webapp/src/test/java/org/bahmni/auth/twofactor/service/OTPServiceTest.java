@@ -147,17 +147,18 @@ public class OTPServiceTest {
     @Test
     public void shouldLockOutUserIfInvalidAttemptsAreMoreThanConfiguredLimit() {
         OTP otp = otpService.generateAndSaveOtpFor("user");
+        String wrongOTP = otp.toString() + "121";
 
-        String response = otpService.validateOTPFor("user", otp.toString() + "121");
+        String response = otpService.validateOTPFor("user", wrongOTP);
         assertThat(response, is(ResponseConstants.FAILED));
 
-        response = otpService.validateOTPFor("user", otp.toString() + "121");
+        response = otpService.validateOTPFor("user", wrongOTP);
         assertThat(response, is(ResponseConstants.FAILED));
 
-        response = otpService.validateOTPFor("user", otp.toString() + "121");
+        response = otpService.validateOTPFor("user", wrongOTP);
         assertThat(response, is(ResponseConstants.FAILED));
 
-        response = otpService.validateOTPFor("user", otp.toString() + "121");
+        response = otpService.validateOTPFor("user", wrongOTP);
         assertThat(response, is(ResponseConstants.LOCKED_OUT));
     }
 
@@ -227,8 +228,7 @@ public class OTPServiceTest {
 
         ListIterator<LogEvent> iterator = capturedValues.listIterator();
         while (iterator.hasNext()) {
-            assertThat(messages[iterator.nextIndex()], is(iterator.next().getMessage().getFormattedMessage()));
+            assertThat(iterator.next().getMessage().getFormattedMessage(), is(messages[iterator.nextIndex() - 1]));
         }
     }
-
 }

@@ -4,6 +4,7 @@ package org.bahmni.auth.twofactor.controller;
 import com.github.springtestdbunit.DbUnitTestExecutionListener;
 import com.github.springtestdbunit.annotation.DatabaseSetup;
 import org.bahmni.auth.twofactor.Application;
+import org.bahmni.auth.twofactor.ResponseConstants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -34,27 +35,45 @@ public class TwoFactorAuthenticationControllerIntegrationTest {
     public void shouldSendOTPToTheGiveNumber() {
         String response = restOperations.getForObject(SERVER_URL + "/send?userName=user1", String.class);
 
-        assertThat(response, is("true"));
+        assertThat(response, is(ResponseConstants.SUCCESS));
     }
 
     @Test
     public void shouldNotSendOTPIfTheUserHasNoContact() {
         String response = restOperations.getForObject(SERVER_URL + "/send?userName=randomUser", String.class);
 
-        assertThat(response, is("false"));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
     @Test
     public void shouldReturnFalseForValidationWithWrongOTP() {
         String response = restOperations.getForObject(SERVER_URL + "/validate?userName=user2&otp=abcd*^&*&^%$", String.class);
 
-        assertThat(response, is("false"));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
     @Test
     public void shouldReturnFalseForValidationWithWrongUser() {
         String response = restOperations.getForObject(SERVER_URL + "/validate?userName=randomUser&otp=abcd*^&*&^%$", String.class);
 
-        assertThat(response, is("false"));
+        assertThat(response, is(ResponseConstants.FAILED));
+    }
+
+    @Test
+    public void shouldLockOutUserAfterMaxOTPAttempts() {
+        String response = restOperations.getForObject(SERVER_URL + "/send?userName=user1", String.class);
+        assertThat(response, is(ResponseConstants.SUCCESS));
+
+        response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
+        assertThat(response, is(ResponseConstants.LOCKED_OUT));
     }
 }
