@@ -163,6 +163,25 @@ public class OTPServiceTest {
     }
 
     @Test
+    public void comprehensiveTest() {
+        OTP otp = otpService.generateAndSaveOtpFor("user");
+        String wrongOTP = otp.toString() + "121";
+
+        otpService.validateOTPFor("user", wrongOTP);
+        otpService.validateOTPFor("user", wrongOTP);
+        otpService.validateOTPFor("user", wrongOTP);
+        otpService.validateOTPFor("user", wrongOTP);
+
+        OTP otp2 = otpService.generateAndSaveOtpFor("user");
+        String wrongOTP2 = otp2.toString() + "121";
+        otpService.validateOTPFor("user", wrongOTP2);
+        String response = otpService.validateOTPFor("user", otp2.toString());
+
+        assertThat(response, is(ResponseConstants.SUCCESS));
+        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "user locked out for max otp attempts", "OTP " + otp2.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP2 + " by user", "OTP " + otp2.toString() + " validation successful for user");
+    }
+
+    @Test
     public void shouldLogFailedAndLockOutEventsOutUserForInvalidAttempts() {
         OTP otp = otpService.generateAndSaveOtpFor("user");
 

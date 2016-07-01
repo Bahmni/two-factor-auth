@@ -19,6 +19,6 @@ public class OTPConfiguration {
     }
 
     public int getMaxOTPAttempts() {
-        return Integer.valueOf(environment.getProperty("MAX_OTP_ATTEMPTS"));
+        return Integer.valueOf(environment.getProperty("OTP_MAX_ATTEMPTS"));
     }
 }

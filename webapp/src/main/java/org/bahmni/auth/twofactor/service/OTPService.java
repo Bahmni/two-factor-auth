@@ -49,6 +49,7 @@ public class OTPService {
                     return ResponseConstants.FAILED;
                 }
                 generatedOtps.remove(userName);
+                otpAttempts.remove(userName);
                 logger.info("OTP " + receivedOtp + " validation successful for " + userName);
                 return ResponseConstants.SUCCESS;
             } else {

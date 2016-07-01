@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @TestExecutionListeners({DbUnitTestExecutionListener.class})
-@TestPropertySource(properties = {"OTP_EXPIRES_AFTER = 1", "OTP_LENGTH = 6", "MAX_OTP_ATTEMPTS = 3"})
+@TestPropertySource(properties = {"OTP_EXPIRES_AFTER = 1", "OTP_LENGTH = 6", "OTP_MAX_ATTEMPTS = 3"})
 @WebIntegrationTest("server.port:62480")
 @ActiveProfiles("test")
 @DatabaseSetup("dataset.xml")
