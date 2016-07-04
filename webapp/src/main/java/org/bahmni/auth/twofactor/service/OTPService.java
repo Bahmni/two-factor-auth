@@ -46,7 +46,7 @@ public class OTPService {
             if (otp.toString().equals(receivedOtp)) {
                 if (otp.isExpired(otpConfiguration.getExpiryTimeIntervalInMillis())) {
                     logger.warn("Expired OTP " + receivedOtp + " sent by " + userName);
-                    return ResponseConstants.FAILED;
+                    return ResponseConstants.EXPIRED;
                 }
                 generatedOtps.remove(userName);
                 otpAttempts.remove(userName);

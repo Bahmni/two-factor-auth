@@ -116,7 +116,7 @@ public class OTPServiceTest {
 
         String response = otpService.validateOTPFor("user", otp.toString());
 
-        assertThat(response, is(ResponseConstants.FAILED));
+        assertThat(response, is(ResponseConstants.EXPIRED));
     }
 
 
