@@ -159,7 +159,7 @@ public class OTPServiceTest {
         assertThat(response, is(ResponseConstants.FAILED));
 
         response = otpService.validateOTPFor("user", wrongOTP);
-        assertThat(response, is(ResponseConstants.LOCKED_OUT));
+        assertThat(response, is(ResponseConstants.MAX_ATTEMPTS_EXCEEDED));
     }
 
     @Test
@@ -178,11 +178,11 @@ public class OTPServiceTest {
         String response = otpService.validateOTPFor("user", otp2.toString());
 
         assertThat(response, is(ResponseConstants.SUCCESS));
-        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "user locked out for max otp attempts", "OTP " + otp2.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP2 + " by user", "OTP " + otp2.toString() + " validation successful for user");
+        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "Max failed OTP attempts exceeded for user", "OTP " + otp2.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP2 + " by user", "OTP " + otp2.toString() + " validation successful for user");
     }
 
     @Test
-    public void shouldLogFailedAndLockOutEventsOutUserForInvalidAttempts() {
+    public void shouldLogFailedAndMaxInvalidAttemptsEvents() {
         OTP otp = otpService.generateAndSaveOtpFor("user");
 
         String wrongOTP = otp.toString() + "121";
@@ -192,7 +192,7 @@ public class OTPServiceTest {
         otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
 
-        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "user locked out for max otp attempts");
+        verifyErrorMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "Max failed OTP attempts exceeded for user");
     }
 
     @Test

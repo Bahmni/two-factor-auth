@@ -60,8 +60,8 @@ public class OTPService {
                 attempts++;
                 if (attempts > otpConfiguration.getMaxOTPAttempts()) {
                     otpAttempts.remove(userName);
-                    logger.error(userName + " locked out for max otp attempts");
-                    return ResponseConstants.LOCKED_OUT;
+                    logger.error("Max failed OTP attempts exceeded for " + userName);
+                    return ResponseConstants.MAX_ATTEMPTS_EXCEEDED;
                 }
                 otpAttempts.put(userName, attempts);
                 logger.warn("Failed attempt #" + attempts + " using OTP " + receivedOtp + " by " + userName);
