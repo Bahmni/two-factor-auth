@@ -71,9 +71,6 @@ public class TwoFactorAuthenticationControllerIntegrationTest {
         assertThat(response, is(ResponseConstants.FAILED));
 
         response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
-        assertThat(response, is(ResponseConstants.FAILED));
-
-        response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
         assertThat(response, is(ResponseConstants.MAX_ATTEMPTS_EXCEEDED));
     }
 }

@@ -156,9 +156,6 @@ public class OTPServiceTest {
         assertThat(response, is(ResponseConstants.FAILED));
 
         response = otpService.validateOTPFor("user", wrongOTP);
-        assertThat(response, is(ResponseConstants.FAILED));
-
-        response = otpService.validateOTPFor("user", wrongOTP);
         assertThat(response, is(ResponseConstants.MAX_ATTEMPTS_EXCEEDED));
     }
 
@@ -167,7 +164,6 @@ public class OTPServiceTest {
         OTP otp = otpService.generateAndSaveOtpFor("user");
         String wrongOTP = otp.toString() + "121";
 
-        otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
@@ -187,7 +183,6 @@ public class OTPServiceTest {
 
         String wrongOTP = otp.toString() + "121";
 
-        otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
