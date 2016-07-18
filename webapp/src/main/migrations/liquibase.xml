@@ -18,4 +18,16 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="add-bypass2fa-role" author="Jaswanth/Ravindra" context="two-factor-auth">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from role where role = 'bypass2FA'
+            </sqlCheck>
+        </preConditions>
+        <comment>Add role bypass2FA</comment>
+        <sql>
+            insert into role values('bypass2FA', 'Role if assigned disables two factor authentication for that user', uuid());
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
