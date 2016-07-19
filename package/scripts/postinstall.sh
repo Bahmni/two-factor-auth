@@ -22,7 +22,11 @@ mkdir -p /opt/bahmni-two-factor-auth/etc/openmrs/
 mkdir -p /opt/bahmni-two-factor-auth/run/
 mkdir -p /opt/bahmni-two-factor-auth/log/
 mkdir -p /opt/bahmni-two-factor-auth/log/audit-logs/
-mv -f /opt/openmrs/openmrs/WEB-INF/web.xml /opt/bahmni-two-factor-auth/etc/openmrs/
+
+if [ ! -f /opt/bahmni-two-factor-auth/etc/openmrs/web.xml ]; then
+    mv -f /opt/openmrs/openmrs/WEB-INF/web.xml /opt/bahmni-two-factor-auth/etc/openmrs/
+fi
+rm -f /opt/openmrs/openmrs/WEB-INF/web.xml
 cp -f /opt/bahmni-two-factor-auth/etc/externalauth.jar /opt/openmrs/openmrs/WEB-INF/lib/
 cp -f /opt/bahmni-two-factor-auth/etc/web.xml /opt/openmrs/openmrs/WEB-INF/
 chown -R bahmni:bahmni /opt/openmrs/openmrs/WEB-INF/web.xml
