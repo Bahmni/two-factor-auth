@@ -40,8 +40,8 @@ public class OTPService {
         }
         attempts++;
         if (attempts > otpConfiguration.getMaxResendAttempts()) {
-            resendAttempts.remove(userName);
             logger.error("Max resend attempts exceeded by " + userName);
+            clearAllPropertiesFor(userName);
             return null;
         }
         logger.info("Resend attempt #" + attempts + " OTP " + otp + " re-generated for " + userName);
@@ -59,19 +59,24 @@ public class OTPService {
         return stringBuilder.toString();
     }
 
+    private void clearAllPropertiesFor(String userName) {
+        generatedOtps.remove(userName);
+        otpAttempts.remove(userName);
+        resendAttempts.remove(userName);
+    }
+
     public String validateOTPFor(String userName, String receivedOtp) {
         OTP otp = generatedOtps.get(userName);
 
         if (otp != null) {
             if (otp.toString().equals(receivedOtp)) {
                 if (otp.isExpired(otpConfiguration.getExpiryTimeIntervalInMillis())) {
-                    logger.warn("Expired OTP " + receivedOtp + " sent by " + userName);
+                    logger.error("Expired OTP " + receivedOtp + " sent by " + userName);
+                    clearAllPropertiesFor(userName);
                     return ResponseConstants.EXPIRED;
                 }
-                generatedOtps.remove(userName);
-                otpAttempts.remove(userName);
-                resendAttempts.remove(userName);
                 logger.info("OTP " + receivedOtp + " validation successful for " + userName);
+                clearAllPropertiesFor(userName);
                 return ResponseConstants.SUCCESS;
             } else {
                 Integer attempts = otpAttempts.get(userName);
@@ -80,9 +85,9 @@ public class OTPService {
                 }
                 attempts++;
                 if (attempts >= otpConfiguration.getMaxOTPAttempts()) {
-                    otpAttempts.remove(userName);
                     logger.warn("Failed attempt #" + attempts + " using OTP " + receivedOtp + " by " + userName);
                     logger.error("Max failed OTP attempts exceeded for " + userName);
+                    clearAllPropertiesFor(userName);
                     return ResponseConstants.MAX_ATTEMPTS_EXCEEDED;
                 }
                 otpAttempts.put(userName, attempts);

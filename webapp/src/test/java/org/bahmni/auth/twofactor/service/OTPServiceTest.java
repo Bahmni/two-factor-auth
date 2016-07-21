@@ -316,4 +316,91 @@ public class OTPServiceTest {
             assertThat(iterator.next().getMessage().getFormattedMessage(), is(messages[iterator.nextIndex() - 1]));
         }
     }
+
+    @Test
+    public void shouldProperlyClearCountersAfterLoggingOutByMaxingResendOTPAttempts() {
+        OTP otp1 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP1 = otp1.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP1);
+
+        OTP otp2 = otpService.regenerateAndSaveOtpFor("user");
+        OTP otp3 = otpService.regenerateAndSaveOtpFor("user");
+        OTP otp4 = otpService.regenerateAndSaveOtpFor("user");
+        otpService.regenerateAndSaveOtpFor("user");
+
+        OTP otp6 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP2 = otp6.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP2);
+
+        OTP otp7 = otpService.regenerateAndSaveOtpFor("user");
+
+        verifyLogMessages("OTP " + otp1.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP1 + " by user",
+                "Resend attempt #1 OTP " + otp2.toString() + " re-generated for user",
+                "Resend attempt #2 OTP " + otp3.toString() + " re-generated for user",
+                "Resend attempt #3 OTP " + otp4.toString() + " re-generated for user",
+                "Max resend attempts exceeded by user",
+                "OTP " + otp6.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP2 + " by user",
+                "Resend attempt #1 OTP " + otp7.toString() + " re-generated for user");
+    }
+
+
+    @Test
+    public void shouldProperlyClearCountersAfterLoggingOutByMaxingWrongOTPAttempts() {
+        OTP otp1 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP1 = otp1.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP1);
+        otpService.validateOTPFor("user", wrongOTP1);
+        OTP otp2 = otpService.regenerateAndSaveOtpFor("user");
+        otpService.validateOTPFor("user", wrongOTP1);
+
+        OTP otp3 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP2 = otp3.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP2);
+
+        OTP otp4 = otpService.regenerateAndSaveOtpFor("user");
+
+        verifyLogMessages("OTP " + otp1.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP1 + " by user",
+                "Failed attempt #2 using OTP " + wrongOTP1 + " by user",
+                "Resend attempt #1 OTP " + otp2.toString() + " re-generated for user",
+                "Failed attempt #3 using OTP " + wrongOTP1 + " by user",
+                "Max failed OTP attempts exceeded for user",
+                "OTP " + otp3.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP2 + " by user",
+                "Resend attempt #1 OTP " + otp4.toString() + " re-generated for user");
+    }
+
+    @Test
+    public void shouldProperlyClearCountersAfterLoggingOutByExpiryOfOTP() {
+        OTP otp1 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP1 = otp1.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP1);
+
+        OTP otp2 = otpService.regenerateAndSaveOtpFor("user");
+
+        when(System.currentTimeMillis()).thenReturn(120L);
+        otpService.validateOTPFor("user", otp2.toString());
+
+        OTP otp3 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP2 = otp3.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP2);
+
+        OTP otp4 = otpService.regenerateAndSaveOtpFor("user");
+
+        verifyLogMessages("OTP " + otp1.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP1 + " by user",
+                "Resend attempt #1 OTP " + otp2.toString() + " re-generated for user",
+                "Expired OTP " + otp2.toString() + " sent by user",
+                "OTP " + otp3.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP2 + " by user",
+                "Resend attempt #1 OTP " + otp4.toString() + " re-generated for user");
+    }
 }
