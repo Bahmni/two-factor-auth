@@ -24,9 +24,11 @@ public class OTPConfigurationTest {
         when(environment.getProperty("OTP_EXPIRES_AFTER")).thenReturn("10");
         when(environment.getProperty("OTP_LENGTH")).thenReturn("6");
         when(environment.getProperty("OTP_MAX_ATTEMPTS")).thenReturn("3");
+        when(environment.getProperty("OTP_MAX_RESEND_ATTEMPTS")).thenReturn("3");
 
         assertThat(otpConfiguration.getExpiryTimeIntervalInMillis(), is(600000L));
         assertThat(otpConfiguration.getOTPLength(), is(6));
         assertThat(otpConfiguration.getMaxOTPAttempts(), is(3));
+        assertThat(otpConfiguration.getMaxResendAttempts(), is(3));
     }
 }

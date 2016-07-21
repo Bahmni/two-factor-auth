@@ -3,6 +3,7 @@ package org.bahmni.auth.twofactor.controller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bahmni.auth.smsinterface.SmsGateWay;
+import org.bahmni.auth.twofactor.ResponseConstants;
 import org.bahmni.auth.twofactor.database.Database;
 import org.bahmni.auth.twofactor.model.Contact;
 import org.bahmni.auth.twofactor.model.OTP;
@@ -29,9 +30,22 @@ public class TwoFactorAuthenticationController {
     @RequestMapping(path = "/send", method = RequestMethod.GET)
     public boolean sendOTP(@RequestParam(name = "userName") String userName) {
         OTP otp = otpService.generateAndSaveOtpFor(userName);
+        return sendSMS(userName, otp.toString());
+    }
+
+    @RequestMapping(path = "/resend", method = RequestMethod.GET)
+    public String resendOTP(@RequestParam(name = "userName") String userName) {
+        OTP otp = otpService.regenerateAndSaveOtpFor(userName);
+        if (otp == null) {
+            return ResponseConstants.MAX_RESEND_ATTEMPTS_EXCEEDED;
+        }
+        return String.valueOf(sendSMS(userName, otp.toString()));
+    }
+
+    private boolean sendSMS(String userName, String otp) {
         Contact contact = database.findMobileNumberByUserName(userName);
         if (contact != null) {
-            smsGateWay.sendSMS(contact.getCountryCode(), contact.getMobileNumber(), otp.toString());
+            smsGateWay.sendSMS(contact.getCountryCode(), contact.getMobileNumber(), otp);
             logger.info("SMS sent to " + userName + " carrying OTP " + otp);
             return true;
         }

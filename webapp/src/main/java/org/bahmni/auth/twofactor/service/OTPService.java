@@ -17,6 +17,7 @@ public class OTPService {
 
     private Map<String, OTP> generatedOtps = new ConcurrentHashMap<>();
     private Map<String, Integer> otpAttempts = new ConcurrentHashMap<>();
+    private Map<String, Integer> resendAttempts = new ConcurrentHashMap<>();
     private SecureRandom secureRandom = new SecureRandom();
 
     @Autowired
@@ -26,6 +27,25 @@ public class OTPService {
         OTP otp = new OTP(generateOTP(), System.currentTimeMillis());
         generatedOtps.put(userName, otp);
         logger.info("OTP " + otp + " generated for " + userName);
+        return otp;
+    }
+
+    public OTP regenerateAndSaveOtpFor(String userName) {
+        OTP otp = new OTP(generateOTP(), System.currentTimeMillis());
+        generatedOtps.put(userName, otp);
+
+        Integer attempts = resendAttempts.get(userName);
+        if (attempts == null) {
+            attempts = 0;
+        }
+        attempts++;
+        if (attempts > otpConfiguration.getMaxResendAttempts()) {
+            resendAttempts.remove(userName);
+            logger.error("Max resend attempts exceeded by " + userName);
+            return null;
+        }
+        logger.info("Resend attempt #" + attempts + " OTP " + otp + " re-generated for " + userName);
+        resendAttempts.put(userName, attempts);
         return otp;
     }
 
@@ -50,6 +70,7 @@ public class OTPService {
                 }
                 generatedOtps.remove(userName);
                 otpAttempts.remove(userName);
+                resendAttempts.remove(userName);
                 logger.info("OTP " + receivedOtp + " validation successful for " + userName);
                 return ResponseConstants.SUCCESS;
             } else {

@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @TestExecutionListeners({DbUnitTestExecutionListener.class})
-@TestPropertySource(properties = {"OTP_EXPIRES_AFTER = 1", "OTP_LENGTH = 6", "OTP_MAX_ATTEMPTS = 3"})
+@TestPropertySource(properties = {"OTP_EXPIRES_AFTER = 1", "OTP_LENGTH = 6", "OTP_MAX_ATTEMPTS = 3", "OTP_MAX_RESEND_ATTEMPTS = 3"})
 @WebIntegrationTest("server.port:62480")
 @ActiveProfiles("test")
 @DatabaseSetup("dataset.xml")
@@ -60,7 +60,7 @@ public class TwoFactorAuthenticationControllerIntegrationTest {
     }
 
     @Test
-    public void shouldLockOutUserAfterMaxOTPAttempts() {
+    public void shouldLogOutUserAfterMaxOTPAttempts() {
         String response = restOperations.getForObject(SERVER_URL + "/send?userName=user1", String.class);
         assertThat(response, is(ResponseConstants.SUCCESS));
 
@@ -73,4 +73,27 @@ public class TwoFactorAuthenticationControllerIntegrationTest {
         response = restOperations.getForObject(SERVER_URL + "/validate?userName=user1&otp=abcd*^&*&^%$", String.class);
         assertThat(response, is(ResponseConstants.MAX_ATTEMPTS_EXCEEDED));
     }
+
+    @Test
+    public void shouldResendOTP() {
+        String response = restOperations.getForObject(SERVER_URL + "/resend?userName=user1", String.class);
+
+        assertThat(response, is(ResponseConstants.SUCCESS));
+    }
+
+    @Test
+    public void shouldReturnMaxResendOTPExceededIfResendLimitIsReached() {
+        String response = restOperations.getForObject(SERVER_URL + "/resend?userName=user1", String.class);
+        assertThat(response, is(ResponseConstants.SUCCESS));
+
+        response = restOperations.getForObject(SERVER_URL + "/resend?userName=user1", String.class);
+        assertThat(response, is(ResponseConstants.SUCCESS));
+
+        response = restOperations.getForObject(SERVER_URL + "/resend?userName=user1", String.class);
+        assertThat(response, is(ResponseConstants.SUCCESS));
+
+        response = restOperations.getForObject(SERVER_URL + "/resend?userName=user1", String.class);
+        assertThat(response, is(ResponseConstants.MAX_RESEND_ATTEMPTS_EXCEEDED));
+    }
+
 }

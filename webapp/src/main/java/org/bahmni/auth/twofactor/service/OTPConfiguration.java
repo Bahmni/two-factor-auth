@@ -21,4 +21,8 @@ public class OTPConfiguration {
     public int getMaxOTPAttempts() {
         return Integer.valueOf(environment.getProperty("OTP_MAX_ATTEMPTS"));
     }
+
+    public int getMaxResendAttempts() {
+        return Integer.valueOf(environment.getProperty("OTP_MAX_RESEND_ATTEMPTS"));
+    }
 }
