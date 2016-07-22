@@ -8,14 +8,14 @@ fi
 USERID=bahmni
 GROUPID=bahmni
 /bin/id -g $GROUPID 2>/dev/null
-[ $? -eq 1 ]
-groupadd bahmni
+if [ $? -eq 1 ]; then
+    groupadd bahmni
+fi
 
 /bin/id $USERID 2>/dev/null
-[ $? -eq 1 ]
-useradd -g bahmni bahmni
-
-chkconfig --add bahmni-two-factor-auth
+if [ $? -eq 1 ]; then
+    useradd -g bahmni bahmni
+fi
 
 #copy web.xml
 mkdir -p /opt/bahmni-two-factor-auth/etc/openmrs/
@@ -23,9 +23,11 @@ mkdir -p /opt/bahmni-two-factor-auth/run/
 mkdir -p /opt/bahmni-two-factor-auth/log/
 mkdir -p /opt/bahmni-two-factor-auth/log/audit-logs/
 
-if [ ! -f /opt/bahmni-two-factor-auth/etc/openmrs/web.xml ]; then
+#only copy web.xml on the first run
+if [ $1 -eq 1 ]; then
     mv -f /opt/openmrs/openmrs/WEB-INF/web.xml /opt/bahmni-two-factor-auth/etc/openmrs/
 fi
+
 rm -f /opt/openmrs/openmrs/WEB-INF/web.xml
 cp -f /opt/bahmni-two-factor-auth/etc/externalauth.jar /opt/openmrs/openmrs/WEB-INF/lib/
 cp -f /opt/bahmni-two-factor-auth/etc/web.xml /opt/openmrs/openmrs/WEB-INF/
@@ -70,3 +72,4 @@ if [ -f "/opt/bahmni-two-factor-auth/etc/application.properties" ]; then
     link_properties_file
 fi
 
+chkconfig --add bahmni-two-factor-auth

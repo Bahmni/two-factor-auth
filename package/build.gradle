@@ -30,6 +30,8 @@ ospackage {
         fileMode = 0755
         createDirectoryEntry = true
         into 'etc'
+        exclude('bahmni-two-factor-auth.jar')
+        exclude('*.checksum')
     }
 
     from("${projectDir}/scripts/rpm/") {
