@@ -403,4 +403,24 @@ public class OTPServiceTest {
                 "Failed attempt #1 using OTP " + wrongOTP2 + " by user",
                 "Resend attempt #1 OTP " + otp4.toString() + " re-generated for user");
     }
+
+    @Test
+    public void shouldClearAllAttemptsAfterEveryOTPGeneration() {
+        OTP otp1 = otpService.generateAndSaveOtpFor("user");
+
+        String wrongOTP1 = otp1.toString() + "12";
+
+        otpService.validateOTPFor("user", wrongOTP1);
+        otpService.validateOTPFor("user", wrongOTP1);
+
+        OTP otp2 = otpService.generateAndSaveOtpFor("user");
+        String wrongOTP2 = otp2.toString() + "12";
+        otpService.validateOTPFor("user", wrongOTP2);
+
+        verifyLogMessages("OTP " + otp1.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP1 + " by user",
+                "Failed attempt #2 using OTP " + wrongOTP1 + " by user",
+                "OTP " + otp2.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP2 + " by user");
+    }
 }

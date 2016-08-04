@@ -26,6 +26,7 @@ public class OTPService {
     public OTP generateAndSaveOtpFor(String userName) {
         OTP otp = new OTP(generateOTP(), System.currentTimeMillis());
         generatedOtps.put(userName, otp);
+        clearAllAttemptsCount(userName);
         logger.info("OTP " + otp + " generated for " + userName);
         return otp;
     }
@@ -61,6 +62,10 @@ public class OTPService {
 
     private void clearAllPropertiesFor(String userName) {
         generatedOtps.remove(userName);
+        clearAllAttemptsCount(userName);
+    }
+
+    private void clearAllAttemptsCount(String userName) {
         otpAttempts.remove(userName);
         resendAttempts.remove(userName);
     }
