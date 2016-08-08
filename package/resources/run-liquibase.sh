@@ -6,7 +6,7 @@ if [ -f /etc/bahmni-installer/bahmni.conf ]; then
 fi
 
 CHANGE_LOG_TABLE="-Dliquibase.databaseChangeLogTableName=liquibasechangelog -Dliquibase.databaseChangeLogLockTableName=liquibasechangeloglock -DschemaName=openmrs"
-LIQUIBASE_JAR="/opt/bahmni-two-factor-auth/etc/migrations/liquibase-core-3.5.1.jar"
+LIQUIBASE_JAR="/opt/openmrs/openmrs/WEB-INF/lib/liquibase-core-2.0.5.jar"
 DRIVER="com.mysql.jdbc.Driver"
 CLASSPATH="/opt/bahmni-two-factor-auth/etc/migrations/mysql-connector-java-5.1.39.jar"
 CHANGE_LOG_FILE="/opt/bahmni-two-factor-auth/etc/migrations/liquibase.xml"
