@@ -117,7 +117,7 @@ public class OTPServiceTest {
 
         String response = otpService.validateOTPFor("user", otp.toString());
 
-        assertThat(response, is(ResponseConstants.EXPIRED));
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
 
@@ -175,7 +175,14 @@ public class OTPServiceTest {
         String response = otpService.validateOTPFor("user", otp2.toString());
 
         assertThat(response, is(ResponseConstants.SUCCESS));
-        verifyLogMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "Max failed OTP attempts exceeded for user", "OTP " + otp2.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP2 + " by user", "OTP " + otp2.toString() + " validation successful for user");
+        verifyLogMessages("OTP " + otp.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP + " by user",
+                "Failed attempt #2 using OTP " + wrongOTP + " by user",
+                "Failed attempt #3 using OTP " + wrongOTP + " by user",
+                "Max failed OTP attempts exceeded for user",
+                "OTP " + otp2.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP2 + " by user",
+                "OTP " + otp2.toString() + " validation successful for user");
     }
 
     @Test
@@ -188,7 +195,10 @@ public class OTPServiceTest {
         otpService.validateOTPFor("user", wrongOTP);
         otpService.validateOTPFor("user", wrongOTP);
 
-        verifyLogMessages("OTP " + otp.toString() + " generated for user", "Failed attempt #1 using OTP " + wrongOTP + " by user", "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user", "Max failed OTP attempts exceeded for user");
+        verifyLogMessages("OTP " + otp.toString() + " generated for user",
+                "Failed attempt #1 using OTP " + wrongOTP + " by user",
+                "Failed attempt #2 using OTP " + wrongOTP + " by user", "Failed attempt #3 using OTP " + wrongOTP + " by user",
+                "Max failed OTP attempts exceeded for user");
     }
 
     @Test
@@ -206,7 +216,9 @@ public class OTPServiceTest {
         when(System.currentTimeMillis()).thenReturn(1290L);
         otpService.validateOTPFor("user", otp.toString());
 
-        verifyLogMessages("OTP " + otp.toString() + " generated for user", "Expired OTP " + otp.toString() + " sent by user");
+        verifyLogMessages("OTP " + otp.toString() + " generated for user",
+                "Expired OTP " + otp.toString() + " sent by user",
+                "Failed attempt #1 using OTP " + otp + " by user");
     }
 
     @Test
@@ -252,7 +264,30 @@ public class OTPServiceTest {
 
         assertThat(response, is(ResponseConstants.SUCCESS));
 
-        verifyLogMessages("Resend attempt #1 OTP " + otp.toString() + " re-generated for userName", "OTP " + otp.toString() + " validation successful for userName");
+        verifyLogMessages("Resend attempt #1 OTP " + otp.toString() + " re-generated for userName",
+                "OTP " + otp.toString() + " validation successful for userName");
+    }
+    @Test
+    public void shouldValidatePreviousSentOTPWhenItIsInTime() {
+        OTP otp1 = otpService.generateAndSaveOtpFor("userName");
+
+        otpService.regenerateAndSaveOtpFor("userName");
+
+        String response = otpService.validateOTPFor("userName", otp1.toString());
+
+        assertThat(response, is(ResponseConstants.SUCCESS));
+    }
+    //shouldReturnFalseIfTheGivenOTPIsExpired
+    @Test
+    public void shouldNotValidateIfTheGivenOTPIsExpired() {
+        OTP otp1 = otpService.generateAndSaveOtpFor("userName");
+
+        when(System.currentTimeMillis()).thenReturn(120L);
+        otpService.regenerateAndSaveOtpFor("userName");
+
+        String response = otpService.validateOTPFor("userName", otp1.toString());
+
+        assertThat(response, is(ResponseConstants.FAILED));
     }
 
     @Test
@@ -267,20 +302,54 @@ public class OTPServiceTest {
         assertThat(otp3, is(not(nullValue())));
         assertThat(otp4, is(nullValue()));
 
-        verifyLogMessages("Resend attempt #1 OTP " + otp1.toString() + " re-generated for userName", "Resend attempt #2 OTP " + otp2.toString() + " re-generated for userName", "Resend attempt #3 OTP " + otp3.toString() + " re-generated for userName", "Max resend attempts exceeded by userName");
+        verifyLogMessages("Resend attempt #1 OTP " + otp1.toString() + " re-generated for userName",
+                "Resend attempt #2 OTP " + otp2.toString() + " re-generated for userName",
+                "Resend attempt #3 OTP " + otp3.toString() + " re-generated for userName", "Max resend attempts exceeded by userName");
     }
 
     @Test
-    public void shouldValidateTheOTPGeneratedAtLastAllowedAttempt() {
+    public void shouldValidateTheOTPGeneratedFirstIsValid() {
         OTP otp1 = otpService.regenerateAndSaveOtpFor("userName");
         OTP otp2 = otpService.regenerateAndSaveOtpFor("userName");
         OTP otp3 = otpService.regenerateAndSaveOtpFor("userName");
 
-        String response = otpService.validateOTPFor("userName", otp3.toString());
+        String response = otpService.validateOTPFor("userName", otp1.toString());
 
         assertThat(response, is(ResponseConstants.SUCCESS));
 
-        verifyLogMessages("Resend attempt #1 OTP " + otp1.toString() + " re-generated for userName", "Resend attempt #2 OTP " + otp2.toString() + " re-generated for userName", "Resend attempt #3 OTP " + otp3.toString() + " re-generated for userName", "OTP " + otp3.toString() + " validation successful for userName");
+        verifyLogMessages("Resend attempt #1 OTP " + otp1.toString() + " re-generated for userName",
+                "Resend attempt #2 OTP " + otp2.toString() + " re-generated for userName",
+                "Resend attempt #3 OTP " + otp3.toString() + " re-generated for userName",
+                "OTP " + otp1.toString() + " validation successful for userName");
+    }
+
+    @Test
+    public void shouldValidateExpiredOTPAttemptFails() {
+        OTP otp1 = otpService.regenerateAndSaveOtpFor("userName");
+        OTP otp2 = otpService.regenerateAndSaveOtpFor("userName");
+        OTP otp3 = otpService.regenerateAndSaveOtpFor("userName");
+
+        // To make otp.isExpired return false
+        when(System.currentTimeMillis()).thenReturn(Long.MIN_VALUE);
+        String response = otpService.validateOTPFor("userName", otp1.toString());
+        assertThat(response, is(ResponseConstants.FAILED));
+        response = otpService.validateOTPFor("userName", otp2.toString());
+        assertThat(response, is(ResponseConstants.FAILED));
+
+        // To make otp.isExpired return true
+        when(System.currentTimeMillis()).thenReturn(Long.MAX_VALUE);
+        response = otpService.validateOTPFor("userName", otp3.toString());
+        assertThat(response, is(ResponseConstants.MAX_ATTEMPTS_EXCEEDED));
+        verifyLogMessages("Resend attempt #1 OTP " + otp1.toString() + " re-generated for userName",
+                "Resend attempt #2 OTP " + otp2.toString() + " re-generated for userName",
+                "Resend attempt #3 OTP " + otp3.toString() + " re-generated for userName",
+                "Expired OTP " + otp1.toString() + " sent by userName",
+                "Failed attempt #1 using OTP " + otp1.toString() + " by userName",
+                "Expired OTP " + otp2.toString() + " sent by userName",
+                "Failed attempt #2 using OTP " + otp2.toString() + " by userName",
+                "Expired OTP " + otp3.toString() + " sent by userName",
+                "Failed attempt #3 using OTP " + otp3.toString() + " by userName",
+                "Max failed OTP attempts exceeded for userName");
     }
 
     @Test
@@ -399,6 +468,7 @@ public class OTPServiceTest {
                 "Failed attempt #1 using OTP " + wrongOTP1 + " by user",
                 "Resend attempt #1 OTP " + otp2.toString() + " re-generated for user",
                 "Expired OTP " + otp2.toString() + " sent by user",
+                "Failed attempt #2 using OTP " + otp2.toString() + " by user",
                 "OTP " + otp3.toString() + " generated for user",
                 "Failed attempt #1 using OTP " + wrongOTP2 + " by user",
                 "Resend attempt #1 OTP " + otp4.toString() + " re-generated for user");

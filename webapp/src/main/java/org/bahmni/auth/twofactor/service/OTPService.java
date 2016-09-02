@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OTPService {
     private static Logger logger = LogManager.getLogger(OTPService.class);
 
-    private Map<String, OTP> generatedOtps = new ConcurrentHashMap<>();
+    private Map<String, List<OTP>> generatedOtps = new ConcurrentHashMap<>();
     private Map<String, Integer> otpAttempts = new ConcurrentHashMap<>();
     private Map<String, Integer> resendAttempts = new ConcurrentHashMap<>();
     private SecureRandom secureRandom = new SecureRandom();
@@ -25,7 +27,7 @@ public class OTPService {
 
     public OTP generateAndSaveOtpFor(String userName) {
         OTP otp = new OTP(generateOTP(), System.currentTimeMillis());
-        generatedOtps.put(userName, otp);
+        pushOTP(userName, otp);
         clearAllAttemptsCount(userName);
         logger.info("OTP " + otp + " generated for " + userName);
         return otp;
@@ -33,7 +35,7 @@ public class OTPService {
 
     public OTP regenerateAndSaveOtpFor(String userName) {
         OTP otp = new OTP(generateOTP(), System.currentTimeMillis());
-        generatedOtps.put(userName, otp);
+        pushOTP(userName, otp);
 
         Integer attempts = resendAttempts.get(userName);
         if (attempts == null) {
@@ -42,7 +44,7 @@ public class OTPService {
         attempts++;
         if (attempts > otpConfiguration.getMaxResendAttempts()) {
             logger.error("Max resend attempts exceeded by " + userName);
-            clearAllPropertiesFor(userName);
+            clearAllAttemptsCount(userName);
             return null;
         }
         logger.info("Resend attempt #" + attempts + " OTP " + otp + " re-generated for " + userName);
@@ -60,10 +62,6 @@ public class OTPService {
         return stringBuilder.toString();
     }
 
-    private void clearAllPropertiesFor(String userName) {
-        generatedOtps.remove(userName);
-        clearAllAttemptsCount(userName);
-    }
 
     private void clearAllAttemptsCount(String userName) {
         otpAttempts.remove(userName);
@@ -71,36 +69,48 @@ public class OTPService {
     }
 
     public String validateOTPFor(String userName, String receivedOtp) {
-        OTP otp = generatedOtps.get(userName);
+        List<OTP> otps = generatedOtps.get(userName);
 
-        if (otp != null) {
-            if (otp.toString().equals(receivedOtp)) {
-                if (otp.isExpired(otpConfiguration.getExpiryTimeIntervalInMillis())) {
-                    logger.error("Expired OTP " + receivedOtp + " sent by " + userName);
-                    clearAllPropertiesFor(userName);
-                    return ResponseConstants.EXPIRED;
+        if (otps != null) {
+            for (int i=0;i< otps.size();i++) {
+                OTP otp=otps.get(i);
+                if (otp.toString().equals(receivedOtp)) {
+                    if (otp.isExpired(otpConfiguration.getExpiryTimeIntervalInMillis())) {
+                        logger.error("Expired OTP " + receivedOtp + " sent by " + userName);
+                        otps.remove(otp);
+                        continue;
+                    }
+                    logger.info("OTP " + receivedOtp + " validation successful for " + userName);
+                    clearAllAttemptsCount(userName);
+                    return ResponseConstants.SUCCESS;
                 }
-                logger.info("OTP " + receivedOtp + " validation successful for " + userName);
-                clearAllPropertiesFor(userName);
-                return ResponseConstants.SUCCESS;
-            } else {
-                Integer attempts = otpAttempts.get(userName);
-                if (attempts == null) {
-                    attempts = 0;
-                }
-                attempts++;
-                if (attempts >= otpConfiguration.getMaxOTPAttempts()) {
-                    logger.warn("Failed attempt #" + attempts + " using OTP " + receivedOtp + " by " + userName);
-                    logger.error("Max failed OTP attempts exceeded for " + userName);
-                    clearAllPropertiesFor(userName);
-                    return ResponseConstants.MAX_ATTEMPTS_EXCEEDED;
-                }
-                otpAttempts.put(userName, attempts);
-                logger.warn("Failed attempt #" + attempts + " using OTP " + receivedOtp + " by " + userName);
+
             }
+            Integer attempts = otpAttempts.get(userName);
+            if (attempts == null) {
+                attempts = 0;
+            }
+            attempts++;
+            if (attempts >= otpConfiguration.getMaxOTPAttempts()) {
+                logger.warn("Failed attempt #" + attempts + " using OTP " + receivedOtp + " by " + userName);
+                logger.error("Max failed OTP attempts exceeded for " + userName);
+                clearAllAttemptsCount(userName);
+                return ResponseConstants.MAX_ATTEMPTS_EXCEEDED;
+            }
+            otpAttempts.put(userName, attempts);
+            logger.warn("Failed attempt #" + attempts + " using OTP " + receivedOtp + " by " + userName);
         } else {
             logger.error("OTP " + receivedOtp + " sent by " + userName + " is not generated by the system");
         }
         return ResponseConstants.FAILED;
+    }
+
+    private void pushOTP(String userName, OTP otp){
+        List<OTP> otps= generatedOtps.get(userName);
+        if(null == otps){
+            otps = new ArrayList();
+        }
+        otps.add(otp);
+        generatedOtps.put(userName, otps);
     }
 }
