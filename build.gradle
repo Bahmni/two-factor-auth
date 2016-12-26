@@ -5,11 +5,11 @@ subprojects {
         mavenCentral()
         maven {
             name "bahmni-artifactory-snapshot"
-            url "http://bahmnirepo.thoughtworks.com/artifactory/libs-snapshot-local"
+            url "http://repo.mybahmni.org.s3.amazonaws.com/artifactory/snapshot"
         }
         maven {
             name "bahmni-artifactory-release"
-            url "http://bahmnirepo.thoughtworks.com/artifactory/libs-release-local"
+            url "http://repo.mybahmni.org.s3.amazonaws.com/artifactory/release"
         }
     }
 
