@@ -6,6 +6,7 @@ buildscript {
 
     dependencies {
         classpath 'org.hibernate.build.gradle:gradle-maven-publish-auth:2.0.1'
+        compile group: 'org.kuali.maven.wagons', name: 'maven-s3-wagon', version: '1.1.9'
     }
 }
 apply plugin: "maven-publish"
@@ -29,7 +30,8 @@ publishing {
     repositories {
         maven {
             name "bahmni-artifactory"
-            url "http://bahmnirepo.thoughtworks.com/artifactory/libs-${project.version.endsWith('-SNAPSHOT') ? 'snapshot' : 'release'}-local"
+            url "s3://repo.mybahmni.org/artifactory/${project.version.endsWith('-SNAPSHOT') ? 'snapshot' : 'release'}"
         }
     }
+
 }
