@@ -23,6 +23,8 @@ dependencies {
         compile('org.kuali.maven.wagons:maven-s3-wagon:1.1.9')
 }
 
+println System.getenv( 'AWS_ACCESS_KEY_ID' )
+
 publishing {
     publications {
         myPublication(MavenPublication) {
@@ -30,11 +32,16 @@ publishing {
         }
     }
 
+
     repositories {
         maven {
             name "bahmni-artifactory"
             url "s3://repo.mybahmni.org/artifactory/${project.version.endsWith('-SNAPSHOT') ? 'snapshot' : 'release'}"
-        }
+	credentials(AwsCredentials) {
+            	accessKey System.getenv('AWS_ACCESS_KEY_ID')
+            	secretKey System.getenv('AWS_SECRET_ACCESS_KEY')
+         }
+	}
     }
 
 }
