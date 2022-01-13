@@ -46,7 +46,7 @@ public class TwoFactorAuthenticationController {
         Contact contact = database.findMobileNumberByUserName(userName);
         if (contact != null) {
             smsGateWay.sendSMS(contact.getCountryCode(), contact.getMobileNumber(), otp);
-            logger.info("SMS sent to " + userName + " carrying OTP " + otp);
+            logger.info("SMS sent to {} carrying OTP {}", userName, otp);
             return true;
         }
         return false;
