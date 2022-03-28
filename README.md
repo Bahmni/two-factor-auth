@@ -4,7 +4,7 @@ This repository contains the web application that handles two factor authenticat
 # Installing a plugin
 Download the `jar` file of the plugin you want to install and place it in `/home/bahmni/.bahmni-security/` directory. If the plugin requires any configuration usually the configuration file also resides in the above mentioned directory unless mentioned otherwise in the plugin's documentation.
 
-#Developers
+# Developers
 The build tool used in the project is gradle. The project is divided into two sub-projects. One is `sms-interface` and the other is `webapp`. 
 
 * `sms-interface` project contains the contract for the third party SMS gateway plugin. To build the project use `./gradlew clean sms-interface:build` 
